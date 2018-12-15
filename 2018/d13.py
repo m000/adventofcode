@@ -35,14 +35,16 @@ def read_dimensions(inputf):
     return (max([d[0] for d in ldims])+1, max([d[1] for d in ldims]))
 
 def print_board(board, carts, crashes=[]):
-    road_bak = [ (pos, board[pos[0], pos[1]]) for pos, di, nit in carts ]
+    road_bak = []
     for pos, d, nit in carts:
+        road_bak.append( (pos, board[pos[0], pos[1]]) )
         board[pos[0], pos[1]] = d
-    for c in crashes:
-        board[c[1], c[0]] = 'X'
+    for pos in crashes:
+        road_bak.append( (pos, board[pos[0], pos[1]]) )
+        board[pos[0], pos[1]] = 'X'
     numpy.apply_along_axis(lambda s: print(''.join(s)), axis=1, arr=board)
-    for pos, d in road_bak:
-        board[pos[0], pos[1]] = d
+    for pos, r in road_bak:
+        board[pos[0], pos[1]] = r
 
 def plot_board(board, carts, crashes=[], stride=2):
     icolor = 0
@@ -175,6 +177,8 @@ if DEBUG:
 # ------------------------------------------------
 i = 0
 while len(carts) > 1:
+    if DEBUG:
+        print('\nafter tick %d' % i)
     carts, crashes = tick(board, carts)
     if crashes: break
     i += 1
@@ -189,6 +193,8 @@ plot_board(board, carts, crashes)
 # part 2
 # ------------------------------------------------
 while len(carts) > 1:
+    if DEBUG:
+        print('\nafter tick %d' % i)
     carts, crashes = tick(board, carts)
     i += 1
 assert(len(carts) <= 1)
