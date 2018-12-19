@@ -48,6 +48,7 @@ class AoCVM:
                 else:
                     l = self.opt[ip]
                     self.regs = l(*self.regs)
+                print(ip, self.regs)
                 
     def ins2sympy(self, ins, sreg_array='sregv'):
         # construct symbolic arguments
@@ -103,12 +104,11 @@ class AoCVM:
                 ip += args[1] + 1
                 continue
             else:
-                print('brk')
-                #if DEBUG:
-                print('%s %s' % (op.__name__, args))
+                if DEBUG:
+                    print('brk')
                 sregv = [sympy.expand(sr) for sr in sregv]
-                print(sregv)
-                print(10*'-')
+                print('B', ip_start, '%s %s' % (op.__name__, args), file=sys.stderr)
+                print('C', ip_start, sregv, file=sys.stderr)
                 break
 
         self.opt[ip_start] = lambdify(sreg, sregv, ('math'))
