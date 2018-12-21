@@ -9,6 +9,7 @@ DEBUG = False
 
 class AoCVM:
     def __init__(self, opcode_specfile=None, nregs=4):
+        self.count = 0
         self.nregs = nregs
         self.regs = [0,] * self.nregs
         self.ip = None
@@ -32,23 +33,31 @@ class AoCVM:
     def execute(self, infile=None, optimize=False):
         if infile is not None: self.load(infile)
 
+        self.count = 0
         if self.ip is None:             # day 16
             for f, args in self.program:
                 f(*args)
+                self.count += 1
         elif not optimize:              # day 19
             while self.regs[self.ip] < len(self.program):
                 f, args = self.program[self.regs[self.ip]]
                 f(*args)
                 self.regs[self.ip] += 1
+                self.count += 1
         else:                           # day 19
             while self.regs[self.ip] < len(self.program):
                 ip = self.regs[self.ip]
                 if ip not in self.opt:
-                    l = self.optimize(ip)
+                    l, bbl = self.optimize(ip)
                 else:
-                    l = self.opt[ip]
+                    l, bbl = self.opt[ip]
                     self.regs = l(*self.regs)
-                print(ip, self.regs)
+                self.count += bbl
+                #print(ip, self.regs)
+                #if ip == 11:
+                    #print('X')
+                    #sympy.solveset
+                    #sys.exit(0)
                 
     def ins2sympy(self, ins, sreg_array='sregv'):
         # construct symbolic arguments
@@ -104,14 +113,13 @@ class AoCVM:
                 ip += args[1] + 1
                 continue
             else:
-                if DEBUG:
-                    print('brk')
                 sregv = [sympy.expand(sr) for sr in sregv]
-                print('B', ip_start, '%s %s' % (op.__name__, args), file=sys.stderr)
-                print('C', ip_start, sregv, file=sys.stderr)
+                ip_str = '{0:2d} {0:2d}'.format(ip_start, ip)
+                print('B', ip_str, self.ins2sympy((op, args), 'r'), file=sys.stderr)
+                print('C', ip_str, sregv, file=sys.stderr)
                 break
 
-        self.opt[ip_start] = lambdify(sreg, sregv, ('math'))
+        self.opt[ip_start] = (lambdify(sreg, sregv, ('math')), bbl)
         return self.opt[ip_start]
 
     def load(self, infile):
@@ -263,16 +271,16 @@ if __name__ == '__main__':
     # ------------------------------------------------
     # part 1
     # ------------------------------------------------
-    #vm = AoCVM(INPUT, nregs=6)
-    #vm.load(INPUT)
-    #vm.execute()
-    #print(vm.regs)
+    vm = AoCVM(INPUT, nregs=6)
+    vm.load(INPUT)
+    vm.execute()
+    print(vm.count, vm.regs)
 
     vm = AoCVM(INPUT, nregs=6)
     vm.load(INPUT)
-    vm.regs[0] = 1
+    #vm.regs[0] = 1
     vm.execute(optimize=True)
-    print(vm.regs)
+    print(vm.count, vm.regs)
 
     # ------------------------------------------------
     # part 2
