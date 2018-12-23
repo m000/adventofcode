@@ -3,3 +3,4 @@ progress==1.4
 scipy==1.1.0
 termcolor==1.1.0
 matplotlib==3.0.2
+networkx==2.2
