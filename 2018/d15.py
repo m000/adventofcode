@@ -24,7 +24,6 @@ units_max = 1000
 units_re = r'([GE])'
 units_hp = {'G': 200, 'E': 200}
 units_ap = {'G': 3, 'E': 3}
-units_id = {'G': iter(range(units_max)), 'E': iter(range(units_max))}
 
 # ------------------------------------------------
 # helpers
@@ -38,7 +37,7 @@ class Unit:
         self.type = utype
         self.hp = units_hp[self.type]
         self.ap = units_ap[self.type]
-        self.id = next(units_id[self.type])
+        self.id = next(self.board.units_id[self.type])
 
     def __str__(self):
         return '%s[%s, hp=%03d, ap=%d]' % (
@@ -111,7 +110,7 @@ class Unit:
     def move(self, move_to):
         print('%s moved to %s' % (self, move_to), file=sys.stderr)
 
-        # make sure node is in the graph        
+        # make sure node is in the graph
         if self.pos not in self.board.graph.nodes:
             self.add_to_graph()
 
@@ -199,6 +198,9 @@ class Board:
                 ldims.append( (ln, len(line.rstrip())) )
         self.dims = (max([d[0] for d in ldims])+1, max([d[1] for d in ldims]))
 
+        # reset unit ids
+        self.units_id = {utype: iter(range(units_max)) for utype in units_hp}
+
         # read data
         self.board = np.empty(self.dims, dtype=np.unicode)
         self.units = []
@@ -263,6 +265,12 @@ class Board:
     def __str__(self):
         return '\n'.join(np.apply_along_axis(lambda s: ''.join(s), axis=1, arr=self.board))
 
+    def count(self, utype=None):
+        if utype == None:
+            return len(self.units)
+        else:
+            return len([u for u in self.units if u.type == utype])
+
     def plot(self):
         # https://matplotlib.org/examples/color/colormaps_reference.html
         wcolor = 255    # wall
@@ -303,9 +311,11 @@ class Board:
             if u.type not in s:
                 s[u.type] = 0
             s[u.type] += u.hp
-        return '\n'.join([ '%s:[%3d x %4d = %6d]' % (k, self.round, v, v*self.round) for k, v in s.items()])
+        return '\n'.join([ '%s(%03d)(%02d):[%3d x %4d = %6d]' %
+            (k, units_hp[k], units_ap[k], self.round, v, v*self.round)
+            for k, v in sorted(s.items())])
 
-    def tick(self):
+    def tick(self, quiet=False):
         print(hr('round %04d' % self.round), file=sys.stderr)
 
         # sort units
@@ -316,12 +326,17 @@ class Board:
             if (u.hp <= 0):
                 continue
             if self.finished:
+                print(self.score)
+                print('')
                 self.plot()
                 return
             if DEBUG_STEP:
                 self.plot()
             u.action()
-        self.plot()
+
+        # update after tick
+        if not quiet:
+            self.plot()
         self.round += 1
 
 # ------------------------------------------------
@@ -330,11 +345,25 @@ class Board:
 b = Board(INPUT)
 b.plot()
 while not b.finished:
-    b.tick()
-print(b.score)
+    b.tick(quiet=True)
 
 # ------------------------------------------------
 # part 2
 # ------------------------------------------------
+units_ap_bak = units_ap.copy()
+while True:
+    units_ap['E'] += 1
+    b = Board(INPUT)
+    b.plot()
+    ne = b.count('E')
+    while not b.finished:
+        b.tick(quiet=True)
+        if b.count('E') < ne:
+            print('Elf killed. Aborting simulation at round %d.' % (b.round), file=sys.stderr)
+            b.plot()
+            break
+    if b.finished:
+        break
+units_ap = units_ap_bak
 
 # vim:sts=4:sw=4:et:
