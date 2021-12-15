@@ -1,8 +1,10 @@
 """Boilerplate code for AoC solutions."""
 import logging
 import os
+from itertools import repeat, takewhile
 from pathlib import Path
-
+from types import SimpleNamespace
+from collections import namedtuple
 
 def input_file(day, specifier=None):
     input_dir = Path(__file__).parent / 'input'
@@ -28,6 +30,17 @@ def input_enum(day, specifier=None, striplines=True, start=0):
         for n, line in enumerate(f, start=start):
             line = line if not striplines else line.strip()
             yield n, line
+
+
+"""Named tuple for specifing how multi_input processes the input."""
+MultiInputSpecifier = namedtuple('MultiInputSpecifier', ('name', 'takewhile_condition', 'line_parse'))
+
+#def multi_input(day, specifier=None, striplines=True):
+    #with input_file(day, specifier).open() as f:
+        #for mispec in 
+        #for l in takewhile
+        #for line in f:
+            #yield line if not striplines else line.strip()
 
 
 def logging_setup(loglevel_default='WARNING'):
