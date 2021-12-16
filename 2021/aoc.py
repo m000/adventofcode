@@ -38,6 +38,8 @@ def char_input(day, specifier=None, valid=None, ignored=None):
     are silently dropped (ignore). For any other characters, a warning
     will be logged.
     """
+    input_file_ = input_file(day, specifier)
+
     if valid is None:
         is_valid = lambda c: True
     elif callable(valid):
@@ -52,14 +54,14 @@ def char_input(day, specifier=None, valid=None, ignored=None):
     else:
         is_ignored = lambda c: c in ignored
 
-    with input_file(day, specifier).open() as f:
-        c = f.read(1)
-        if is_valid(c):
-            yield c
-        elif is_ignored(c):
-            pass
-        else:
-            logging.warning("Invalid character '{c}' in {f.name}:{f.tell()}.")
+    for ln, line in input_enum(day, specifier, striplines=False, start=1):
+        for cn, c in enumerate(line):
+            if is_valid(c):
+                yield c
+            elif is_ignored(c):
+                pass
+            else:
+                logging.warning(f"Invalid character '{c}' in {input_file_.name}:{ln}:{cn}.")
 
 
 """Named tuple for specifing how multi_input processes the input."""
