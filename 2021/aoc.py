@@ -32,6 +32,36 @@ def input_enum(day, specifier=None, striplines=True, start=0):
             yield n, line
 
 
+def char_input(day, specifier=None, valid=None, ignored=None):
+    """Reads input for day character by character. valid and ignored can
+    be used to specify which characters are yielded (valid) and which
+    are silently dropped (ignore). For any other characters, a warning
+    will be logged.
+    """
+    if valid is None:
+        is_valid = lambda c: True
+    elif callable(valid):
+        is_valid = valid
+    else:
+        is_valid = lambda c: c in valid
+
+    if ignored is None:
+        is_ignored = lambda c: True
+    elif callable(ignored):
+        is_ignored = ignored
+    else:
+        is_ignored = lambda c: c in ignored
+
+    with input_file(day, specifier).open() as f:
+        c = f.read(1)
+        if is_valid(c):
+            yield c
+        elif is_ignored(c):
+            continue
+        else:
+            logging.warning("Invalid character '{c}' in {f.name}:{f.tell()}.")
+
+
 """Named tuple for specifing how multi_input processes the input."""
 MultiInputSpecifier = namedtuple('MultiInputSpecifier', ('name', 'takewhile_condition', 'line_parse'))
 
@@ -44,6 +74,10 @@ MultiInputSpecifier = namedtuple('MultiInputSpecifier', ('name', 'takewhile_cond
 
 
 def logging_setup(loglevel_default='WARNING'):
+    """Sets up logging for AoC programs. Loglevel can be specified through the
+    AOC_LOGLEVEL environment variable when running a program. A default level
+    may be supplied to use when AOC_LOGLEVEL is not set.
+    """
     loglevel = os.environ.get('AOC_LOGLEVEL', loglevel_default).upper()
     logging.basicConfig(level=loglevel)
 
