@@ -57,7 +57,7 @@ def char_input(day, specifier=None, valid=None, ignored=None):
         if is_valid(c):
             yield c
         elif is_ignored(c):
-            continue
+            pass
         else:
             logging.warning("Invalid character '{c}' in {f.name}:{f.tell()}.")
 
