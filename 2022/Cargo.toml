@@ -9,6 +9,10 @@ edition = "2021"
 name = "day01"
 path = "src/day01.rs"
 
+[[bin]]
+name = "day02"
+path = "src/day02.rs"
+
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
 env_logger = "0.10.0"
