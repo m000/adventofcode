@@ -9,6 +9,15 @@ import aoc
 
 Neighbours = namedtuple('Neighbours', ('n', 'e', 's', 'w'))
 
+def write_array(m, filename, delim=' '):
+    vmax = np.max(m)
+    fieldw = len(str(vmax))
+    print(f'{vmax:0{2*fieldw}}x')
+    with open(filename, 'w') as f:
+        for row in m:
+            print(delim.join([f'{c:0{fieldw}d}' for c in row]), file=f)
+
+
 def neighbours(i, j, data=None):
     all_neighbours = [
         (i - 1, j), (i, j + 1), (i + 1, j), (i, j - 1),
@@ -68,10 +77,13 @@ if __name__ == '__main__':
     )
 
     # first part
-    dist = dijkstra(pweights, (pweights.shape[0]-1, pweights.shape[1]-1))
-    print(dist[-1, -1])
+    #dist = dijkstra(pweights, (pweights.shape[0]-1, pweights.shape[1]-1))
+    #print(dist[-1, -1])
 
     # second part
     pweights2 = expand_map(pweights, 5)
-    dist = dijkstra(pweights2, (pweights2.shape[0]-1, pweights2.shape[1]-1))
-    print(dist[-1, -1])
+    write_array(pweights2, 'foo.txt', delim='')
+
+    #dist = dijkstra(pweights2, (pweights2.shape[0]-1, pweights2.shape[1]-1))
+    #print(dist[-1, -1])
+
