@@ -29,6 +29,15 @@ path = "src/day05.rs"
 name = "day06"
 path = "src/day06.rs"
 
+[[bin]]
+name = "day24"
+path = "src/day24.rs"
+
+[[bin]]
+name = "day24b"
+path = "src/day24b.rs"
+
+
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
 env_logger = "0.10.0"
